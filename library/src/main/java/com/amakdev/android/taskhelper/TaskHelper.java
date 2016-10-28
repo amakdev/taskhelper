@@ -66,26 +66,24 @@ public class TaskHelper implements Application.ActivityLifecycleCallbacks {
 
     @Override
     public void onActivityStarted(Activity activity) {
-
-    }
-
-    @Override
-    public void onActivityResumed(Activity activity) {
         int id = activityIds.getId(activity);
         ActivityContextTaskExecutor activityContextTaskExecutor = activityTaskExecutorMap.get(id);
         activityContextTaskExecutor.notifyUIVisible();
     }
 
     @Override
+    public void onActivityResumed(Activity activity) {
+    }
+
+    @Override
     public void onActivityPaused(Activity activity) {
-        int id = activityIds.getId(activity);
-        ActivityContextTaskExecutor activityContextTaskExecutor = activityTaskExecutorMap.get(id);
-        activityContextTaskExecutor.notifyUIHidden();
     }
 
     @Override
     public void onActivityStopped(Activity activity) {
-
+        int id = activityIds.getId(activity);
+        ActivityContextTaskExecutor activityContextTaskExecutor = activityTaskExecutorMap.get(id);
+        activityContextTaskExecutor.notifyUIHidden();
     }
 
     @Override
