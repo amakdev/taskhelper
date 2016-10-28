@@ -23,7 +23,7 @@ Implement singleton in application
     
 Use inside you UI component
 
-    public class MyuiComponent extends Acticity/Fragment implements TaskListener {
+    public class MyIiComponent extends Acticity /* or Fragment */ implements TaskListener {
     
         private static final String TAG_EXAMPLE_TASK = "TAG_EXAMPLE_TASK";
     
