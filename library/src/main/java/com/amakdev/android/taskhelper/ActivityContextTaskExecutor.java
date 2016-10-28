@@ -10,17 +10,23 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Created by amakov on 28.10.2016.
+ * Task executor for all tasks in context of one concrete Activity instance.
+ * Activity instance is same means that its id is same
  */
-
-public class ActivityContextTaskExecutor implements ContextTaskExecutor, Task.Callback {
+class ActivityContextTaskExecutor implements ContextTaskExecutor, Task.Callback {
 
     private final Handler handler;
     private final Executor executor;
     private final Map<String, TaskListener> listenerByComponentTagMap = new HashMap<>();
-    private final AtomicBoolean inResumed = new AtomicBoolean(false);
+    private final AtomicBoolean isUIVisible = new AtomicBoolean(false);
     private final Map<String, Task> taskByTagMap = new HashMap<>();
 
+    /**
+     * Create instance of executor
+     *
+     * @param handler  UI thread handler
+     * @param executor task executor
+     */
     ActivityContextTaskExecutor(Handler handler, Executor executor) {
         this.handler = handler;
         this.executor = executor;
@@ -32,7 +38,7 @@ public class ActivityContextTaskExecutor implements ContextTaskExecutor, Task.Ca
             throw new IllegalStateException("Component [" + componentTag + "] have already registered listener");
         }
         listenerByComponentTagMap.put(componentTag, taskListener);
-        if (inResumed.get()) {
+        if (isUIVisible.get()) {
             List<Task> list = new ArrayList<>(taskByTagMap.values());
             for (Task task : list) {
                 if (componentTag.equals(task.getComponentTag())) {
@@ -48,7 +54,7 @@ public class ActivityContextTaskExecutor implements ContextTaskExecutor, Task.Ca
         if (taskListener == null) {
             throw new IllegalStateException("Component [" + componentTag + "] hve not registered listener");
         }
-        if (inResumed.get()) {
+        if (isUIVisible.get()) {
             for (Task task : taskByTagMap.values()) {
                 if (componentTag.equals(task.getComponentTag())) {
                     task.detachListener();
@@ -62,14 +68,17 @@ public class ActivityContextTaskExecutor implements ContextTaskExecutor, Task.Ca
         Task task = new Task(componentTag, taskTag, handler, taskRunnable, this);
         taskByTagMap.put(task.getId(), task);
         task.runTask(executor, request);
-        if (inResumed.get()) {
+        if (isUIVisible.get()) {
             TaskListener taskListener = listenerByComponentTagMap.get(task.getComponentTag());
             task.attachListener(taskListener);
         }
     }
 
-    void resume() {
-        inResumed.set(true);
+    /**
+     * Notify that UI became visible
+     */
+    void notifyUIVisible() {
+        isUIVisible.set(true);
         List<Task> list = new ArrayList<>(taskByTagMap.values());
         for (Task task : list) {
             TaskListener taskListener = listenerByComponentTagMap.get(task.getComponentTag());
@@ -79,8 +88,11 @@ public class ActivityContextTaskExecutor implements ContextTaskExecutor, Task.Ca
         }
     }
 
-    void pause() {
-        inResumed.set(false);
+    /**
+     * Notify that UI became invisible
+     */
+    void notifyUIHidden() {
+        isUIVisible.set(false);
         for (Task task : taskByTagMap.values()) {
             task.detachListener();
         }

@@ -5,13 +5,20 @@ import android.os.Handler;
 import java.util.concurrent.Executor;
 
 /**
- * Created by amakov on 28.10.2016.
+ * Task which manages execution of concrete task
  */
-
 class Task {
 
+    /**
+     * Callback to be executed when task will finish and deliver result
+     */
     interface Callback {
 
+        /**
+         * Called when task finished execution and delivered result
+         *
+         * @param task finished task
+         */
         void onFinish(Task task);
 
     }
@@ -26,6 +33,15 @@ class Task {
     private TaskListener taskListener;
     private boolean isProgressDisplayed = false;
 
+    /**
+     * Create new task to execute {@link TaskRunnable}
+     *
+     * @param componentTag tag of component inside UI context
+     * @param taskTag      task of task inside component
+     * @param handler      ui thread handler
+     * @param taskRunnable runnable to execute
+     * @param callback     callback for finish notification
+     */
     Task(String componentTag, String taskTag, Handler handler, TaskRunnable taskRunnable, Callback callback) {
         this.componentTag = componentTag;
         this.taskTag = taskTag;
@@ -34,6 +50,12 @@ class Task {
         this.callback = callback;
     }
 
+    /**
+     * Execute task
+     *
+     * @param executor executor for task
+     * @param request  Request from {@link ContextTaskExecutor#executeTask(String, String, Object, TaskRunnable)}
+     */
     void runTask(Executor executor, final Object request) {
         executor.execute(new Runnable() {
             @Override
@@ -58,6 +80,11 @@ class Task {
         });
     }
 
+    /**
+     * Attach UI listener
+     *
+     * @param taskListener listener object
+     */
     void attachListener(TaskListener taskListener) {
         if (taskListener != null) {
             this.taskListener = taskListener;
@@ -72,6 +99,9 @@ class Task {
         }
     }
 
+    /**
+     * Detach previously attached UI listener
+     */
     void detachListener() {
         if (taskListener != null) {
             if (isProgressDisplayed) {
@@ -82,7 +112,7 @@ class Task {
         }
     }
 
-    void notifyListener() {
+    private void notifyListener() {
         if (taskListener != null) {
             deliverResult();
         }
@@ -97,20 +127,22 @@ class Task {
         callback.onFinish(this);
     }
 
-    public String getId() {
+    /**
+     * Get unique task id
+     *
+     * @return unique task id
+     */
+    String getId() {
         return componentTag + ":" + taskTag;
     }
 
-    public String getComponentTag() {
+    /**
+     * Get component tag in which context task is executed
+     *
+     * @return component tag
+     */
+    String getComponentTag() {
         return componentTag;
-    }
-
-    public String getTaskTag() {
-        return taskTag;
-    }
-
-    public TaskResult getTaskResult() {
-        return taskResult;
     }
 
 }

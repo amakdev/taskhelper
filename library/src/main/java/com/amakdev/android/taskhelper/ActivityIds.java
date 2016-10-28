@@ -7,10 +7,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Created by amakov on 28.10.2016.
+ * Holder for storing unique activity ids
  */
-
-public class ActivityIds {
+class ActivityIds {
 
     private static class ActivityId {
 
@@ -26,11 +25,23 @@ public class ActivityIds {
 
     private List<ActivityId> items = new LinkedList<>();
 
-    public void storeId(Activity activity, int id) {
+    /**
+     * Store id for activity reference
+     *
+     * @param activity activity reference
+     * @param id       unique id
+     */
+    void storeId(Activity activity, int id) {
         items.add(new ActivityId(activity, id));
     }
 
-    public int getId(Activity activity) {
+    /**
+     * Get id for activity reference
+     *
+     * @param activity activity reference
+     * @return unique id
+     */
+    int getId(Activity activity) {
         for (ActivityId activityId : items) {
             if (activityId.activity == activity) {
                 return activityId.id;
@@ -39,7 +50,13 @@ public class ActivityIds {
         return -1;
     }
 
-    public int removeId(Activity activity) {
+    /**
+     * Remove id for activity reference
+     *
+     * @param activity activity reference
+     * @return unique id
+     */
+    int removeId(Activity activity) {
         Iterator<ActivityId> iterator = items.iterator();
         while (iterator.hasNext()) {
             ActivityId activityId = iterator.next();

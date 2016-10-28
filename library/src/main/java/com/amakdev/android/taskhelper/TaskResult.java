@@ -1,9 +1,8 @@
 package com.amakdev.android.taskhelper;
 
 /**
- * Created by amakov on 28.10.2016.
+ * Result of {@link Task} execution
  */
-
 class TaskResult {
 
     private final boolean isSuccess;

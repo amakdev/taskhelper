@@ -14,11 +14,17 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Created by amakov on 28.10.2016.
+ * Helper class for managing activity unique ids. Should be created inside
+ * {@link Application#onCreate()} to work properly
  */
-
 public class TaskHelper implements Application.ActivityLifecycleCallbacks {
 
+    /**
+     * Get instance of TaskHelper
+     *
+     * @param context UI context
+     * @return TaskHelper instance from {@link TaskHelperHolderApplication}
+     */
     public static synchronized TaskHelper getInstance(Context context) {
         Application application = (Application) context.getApplicationContext();
         if (!(application instanceof TaskHelperHolderApplication)) {
@@ -36,6 +42,11 @@ public class TaskHelper implements Application.ActivityLifecycleCallbacks {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Executor executor = Executors.newFixedThreadPool(8);
 
+    /**
+     * Create global {@link TaskHelper} object
+     *
+     * @param context any context
+     */
     public TaskHelper(Context context) {
         Application application = (Application) context.getApplicationContext();
         application.registerActivityLifecycleCallbacks(this);
@@ -62,14 +73,14 @@ public class TaskHelper implements Application.ActivityLifecycleCallbacks {
     public void onActivityResumed(Activity activity) {
         int id = activityIds.getId(activity);
         ActivityContextTaskExecutor activityContextTaskExecutor = activityTaskExecutorMap.get(id);
-        activityContextTaskExecutor.resume();
+        activityContextTaskExecutor.notifyUIVisible();
     }
 
     @Override
     public void onActivityPaused(Activity activity) {
         int id = activityIds.getId(activity);
         ActivityContextTaskExecutor activityContextTaskExecutor = activityTaskExecutorMap.get(id);
-        activityContextTaskExecutor.pause();
+        activityContextTaskExecutor.notifyUIHidden();
     }
 
     @Override
@@ -91,6 +102,12 @@ public class TaskHelper implements Application.ActivityLifecycleCallbacks {
         }
     }
 
+    /**
+     * Retain task executor instance to be used in specified activity context
+     *
+     * @param activity Activity context
+     * @return ready to use task executor
+     */
     public ContextTaskExecutor getTaskExecutor(Activity activity) {
         int id = activityIds.getId(activity);
         return activityTaskExecutorMap.get(id);
